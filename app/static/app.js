@@ -2,13 +2,29 @@ const statusEl = document.getElementById("status");
 const outputEl = document.getElementById("output");
 const setupCard = document.getElementById("setupCard");
 const appWorkspace = document.getElementById("appWorkspace");
+const authShell = document.getElementById("authShell");
+
+function byId(id) {
+  return document.getElementById(id);
+}
+
+function onClick(id, handler) {
+  const element = byId(id);
+  if (element) {
+    element.addEventListener("click", handler);
+  }
+}
 
 function setStatus(message, ok = true) {
-  statusEl.innerHTML = `<div class="status ${ok ? "ok" : "err"}">${message}</div>`;
+  if (statusEl) {
+    statusEl.innerHTML = `<div class="status ${ok ? "ok" : "err"}">${message}</div>`;
+  }
 }
 
 function showOutput(data) {
-  outputEl.textContent = JSON.stringify(data, null, 2);
+  if (outputEl) {
+    outputEl.textContent = JSON.stringify(data, null, 2);
+  }
 }
 
 function getToken() {
@@ -25,7 +41,8 @@ function clearToken() {
 
 function refreshAuthUI() {
   const hasToken = !!getToken();
-  appWorkspace.classList.toggle("hidden", !hasToken);
+  if (appWorkspace) appWorkspace.classList.toggle("hidden", !hasToken);
+  if (authShell) authShell.classList.toggle("hidden", hasToken);
 }
 
 async function request(path, { method = "GET", body, auth = false, form = false } = {}) {
@@ -56,34 +73,38 @@ async function request(path, { method = "GET", body, auth = false, form = false 
   return data;
 }
 
-document.getElementById("btnCriarEmpresa").addEventListener("click", async () => {
+onClick("btnCriarEmpresa", async () => {
   try {
     const payload = {
-      nome: document.getElementById("empresaNome").value,
-      cnpj: document.getElementById("empresaCnpj").value || null,
+      nome: byId("empresaNome").value,
+      cnpj: byId("empresaCnpj").value || null,
     };
     const data = await request("/empresas", { method: "POST", body: payload });
     setStatus("Empresa criada com sucesso.");
     showOutput(data);
-    document.getElementById("adminEmpresaId").value = data.id;
-    document.getElementById("clienteEmpresaId").value = data.id;
-    document.getElementById("recEmpresaId").value = data.id;
+    if (byId("adminEmpresaId")) byId("adminEmpresaId").value = data.id;
+    if (byId("clienteEmpresaId")) byId("clienteEmpresaId").value = data.id;
+    if (byId("recEmpresaId")) byId("recEmpresaId").value = data.id;
   } catch (err) {
     setStatus(err.message, false);
   }
 });
 
-document.getElementById("btnToggleSetup").addEventListener("click", () => {
+onClick("btnToggleSetup", () => {
+  if (!setupCard) return;
   setupCard.classList.toggle("hidden");
 });
+onClick("btnHideSetup", () => {
+  if (setupCard) setupCard.classList.add("hidden");
+});
 
-document.getElementById("btnBootstrap").addEventListener("click", async () => {
+onClick("btnBootstrap", async () => {
   try {
     const payload = {
-      empresa_id: Number(document.getElementById("adminEmpresaId").value),
-      nome: document.getElementById("adminNome").value,
-      email: document.getElementById("adminEmail").value,
-      password: document.getElementById("adminSenha").value,
+      empresa_id: Number(byId("adminEmpresaId").value),
+      nome: byId("adminNome").value,
+      email: byId("adminEmail").value,
+      password: byId("adminSenha").value,
       is_superuser: true,
       permissoes: [],
     };
@@ -95,10 +116,10 @@ document.getElementById("btnBootstrap").addEventListener("click", async () => {
   }
 });
 
-document.getElementById("btnLogin").addEventListener("click", async () => {
+onClick("btnLogin", async () => {
   try {
-    const email = document.getElementById("loginEmail").value;
-    const senha = document.getElementById("loginSenha").value;
+    const email = byId("loginEmail").value;
+    const senha = byId("loginSenha").value;
     const form = new URLSearchParams();
     form.append("username", email);
     form.append("password", senha);
@@ -117,15 +138,12 @@ document.getElementById("btnLogin").addEventListener("click", async () => {
   }
 });
 
-const btnFillDefault = document.getElementById("btnFillDefault");
-if (btnFillDefault) {
-  btnFillDefault.addEventListener("click", () => {
-    document.getElementById("loginEmail").value = "admin@sysconta.com";
-    document.getElementById("loginSenha").value = "Admin@123456";
-  });
-}
+onClick("btnFillDefault", () => {
+  byId("loginEmail").value = "admin@sysconta.com";
+  byId("loginSenha").value = "Admin@123456";
+});
 
-document.getElementById("btnMe").addEventListener("click", async () => {
+onClick("btnMe", async () => {
   try {
     const data = await request("/auth/me", { auth: true });
     setStatus("Dados do usuário carregados.");
@@ -135,23 +153,23 @@ document.getElementById("btnMe").addEventListener("click", async () => {
   }
 });
 
-document.getElementById("btnLogout").addEventListener("click", () => {
+onClick("btnLogout", () => {
   clearToken();
   refreshAuthUI();
   setStatus("Sessão encerrada.");
 });
 
-document.getElementById("btnCriarCliente").addEventListener("click", async () => {
+onClick("btnCriarCliente", async () => {
   try {
     const payload = {
-      empresa_id: Number(document.getElementById("clienteEmpresaId").value),
-      tipo_documento: document.getElementById("clienteTipo").value,
-      documento: document.getElementById("clienteDocumento").value,
-      nome_razao: document.getElementById("clienteNome").value,
-      email: document.getElementById("clienteEmail").value || null,
-      telefone: document.getElementById("clienteTelefone").value || null,
-      cep: document.getElementById("clienteCep").value || null,
-      senha_portal: document.getElementById("clienteSenhaPortal").value || null,
+      empresa_id: Number(byId("clienteEmpresaId").value),
+      tipo_documento: byId("clienteTipo").value,
+      documento: byId("clienteDocumento").value,
+      nome_razao: byId("clienteNome").value,
+      email: byId("clienteEmail").value || null,
+      telefone: byId("clienteTelefone").value || null,
+      cep: byId("clienteCep").value || null,
+      senha_portal: byId("clienteSenhaPortal").value || null,
     };
     const data = await request("/clientes?auto_fill_endereco=true&auto_fill_cnpj=true", {
       method: "POST",
@@ -165,9 +183,9 @@ document.getElementById("btnCriarCliente").addEventListener("click", async () =>
   }
 });
 
-document.getElementById("btnListarClientes").addEventListener("click", async () => {
+onClick("btnListarClientes", async () => {
   try {
-    const empresaId = Number(document.getElementById("clienteEmpresaId").value);
+    const empresaId = Number(byId("clienteEmpresaId").value);
     const data = await request(`/clientes/${empresaId}`, { auth: true });
     setStatus("Clientes listados com sucesso.");
     showOutput(data);
@@ -176,14 +194,14 @@ document.getElementById("btnListarClientes").addEventListener("click", async () 
   }
 });
 
-document.getElementById("btnCriarReceber").addEventListener("click", async () => {
+onClick("btnCriarReceber", async () => {
   try {
     const payload = {
-      empresa_id: Number(document.getElementById("recEmpresaId").value),
-      cliente_id: Number(document.getElementById("recClienteId").value),
-      descricao: document.getElementById("recDescricao").value,
-      valor: Number(document.getElementById("recValor").value),
-      vencimento: document.getElementById("recVencimento").value,
+      empresa_id: Number(byId("recEmpresaId").value),
+      cliente_id: Number(byId("recClienteId").value),
+      descricao: byId("recDescricao").value,
+      valor: Number(byId("recValor").value),
+      vencimento: byId("recVencimento").value,
     };
     const data = await request("/financeiro/contas-receber", {
       method: "POST",
@@ -199,9 +217,9 @@ document.getElementById("btnCriarReceber").addEventListener("click", async () =>
 
 refreshAuthUI();
 
-if (!document.getElementById("loginEmail").value) {
-  document.getElementById("loginEmail").value = "admin@sysconta.com";
+if (byId("loginEmail") && !byId("loginEmail").value) {
+  byId("loginEmail").value = "admin@sysconta.com";
 }
-if (!document.getElementById("loginSenha").value) {
-  document.getElementById("loginSenha").value = "Admin@123456";
+if (byId("loginSenha") && !byId("loginSenha").value) {
+  byId("loginSenha").value = "Admin@123456";
 }
