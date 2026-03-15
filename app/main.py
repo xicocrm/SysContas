@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.core.config import settings
 from app.db import create_db_and_tables
@@ -16,6 +17,7 @@ from app.routers import (
     juridico,
     notificacoes,
     portal,
+    web,
 )
 
 app = FastAPI(title=settings.app_name)
@@ -46,3 +48,5 @@ app.include_router(integracoes.router)
 app.include_router(portal.router)
 app.include_router(notificacoes.router)
 app.include_router(configuracoes.router)
+app.include_router(web.router)
+app.mount("/static", StaticFiles(directory="app/static"), name="static")

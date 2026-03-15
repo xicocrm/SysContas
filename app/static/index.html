@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SysConta - Sistema</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="topbar">SysConta - Sistema Web</div>
+    <div class="container">
+      <div id="status"></div>
+
+      <div class="card" id="setupCard">
+        <h2>1) Setup inicial (somente na primeira vez)</h2>
+        <div class="grid">
+          <div>
+            <label>Nome da empresa</label>
+            <input id="empresaNome" placeholder="Meu Escritório" />
+          </div>
+          <div>
+            <label>CNPJ da empresa</label>
+            <input id="empresaCnpj" placeholder="12345678000199" />
+          </div>
+        </div>
+        <div class="row-actions">
+          <button id="btnCriarEmpresa">Criar empresa</button>
+        </div>
+        <hr />
+        <div class="grid">
+          <div>
+            <label>ID da empresa</label>
+            <input id="adminEmpresaId" placeholder="1" />
+          </div>
+          <div>
+            <label>Nome do administrador</label>
+            <input id="adminNome" placeholder="Administrador" />
+          </div>
+          <div>
+            <label>E-mail</label>
+            <input id="adminEmail" placeholder="admin@sysconta.com" />
+          </div>
+          <div>
+            <label>Senha</label>
+            <input id="adminSenha" type="password" placeholder="Senha forte" />
+          </div>
+        </div>
+        <div class="row-actions">
+          <button id="btnBootstrap">Criar primeiro administrador</button>
+        </div>
+      </div>
+
+      <div class="card" id="loginCard">
+        <h2>2) Login</h2>
+        <div class="grid">
+          <div>
+            <label>E-mail</label>
+            <input id="loginEmail" placeholder="admin@sysconta.com" />
+          </div>
+          <div>
+            <label>Senha</label>
+            <input id="loginSenha" type="password" placeholder="Sua senha" />
+          </div>
+        </div>
+        <div class="row-actions">
+          <button id="btnLogin">Entrar no sistema</button>
+        </div>
+      </div>
+
+      <div class="card hidden" id="appCard">
+        <h2>Painel do sistema</h2>
+        <p>
+          Usuário autenticado. Use os formulários para cadastro. Para operações avançadas,
+          continue usando <a href="/docs" target="_blank">/docs</a>.
+        </p>
+        <div class="row-actions">
+          <button id="btnMe">Ver meu usuário</button>
+          <button class="secondary" id="btnLogout">Sair</button>
+        </div>
+      </div>
+
+      <div class="card hidden" id="clienteCard">
+        <h2>Cadastro de cliente (CPF/CNPJ)</h2>
+        <div class="grid">
+          <div>
+            <label>ID da empresa</label>
+            <input id="clienteEmpresaId" placeholder="1" />
+          </div>
+          <div>
+            <label>Tipo documento</label>
+            <select id="clienteTipo">
+              <option value="cpf">CPF</option>
+              <option value="cnpj">CNPJ</option>
+            </select>
+          </div>
+          <div>
+            <label>Documento</label>
+            <input id="clienteDocumento" placeholder="Somente números" />
+          </div>
+          <div>
+            <label>Nome / Razão social</label>
+            <input id="clienteNome" />
+          </div>
+          <div>
+            <label>E-mail</label>
+            <input id="clienteEmail" />
+          </div>
+          <div>
+            <label>Telefone</label>
+            <input id="clienteTelefone" />
+          </div>
+          <div>
+            <label>CEP</label>
+            <input id="clienteCep" />
+          </div>
+          <div>
+            <label>Senha portal (opcional)</label>
+            <input id="clienteSenhaPortal" type="password" />
+          </div>
+        </div>
+        <div class="row-actions">
+          <button id="btnCriarCliente">Salvar cliente</button>
+          <button class="secondary" id="btnListarClientes">Listar clientes</button>
+        </div>
+      </div>
+
+      <div class="card hidden" id="financeiroCard">
+        <h2>Conta a receber</h2>
+        <div class="grid">
+          <div>
+            <label>ID empresa</label>
+            <input id="recEmpresaId" placeholder="1" />
+          </div>
+          <div>
+            <label>ID cliente</label>
+            <input id="recClienteId" placeholder="1" />
+          </div>
+          <div>
+            <label>Descrição</label>
+            <input id="recDescricao" placeholder="Mensalidade" />
+          </div>
+          <div>
+            <label>Valor</label>
+            <input id="recValor" placeholder="199.90" />
+          </div>
+          <div>
+            <label>Vencimento</label>
+            <input id="recVencimento" type="date" />
+          </div>
+        </div>
+        <div class="row-actions">
+          <button id="btnCriarReceber">Salvar conta a receber</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Resultado</h2>
+        <pre id="output">{}</pre>
+      </div>
+    </div>
+    <script src="/static/app.js"></script>
+  </body>
+  </html>

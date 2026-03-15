@@ -74,6 +74,7 @@ uvicorn app.main:app --reload
 ```
 
 Swagger: `http://127.0.0.1:8000/docs`
+Sistema web (login/painel): `http://127.0.0.1:8000/` ou `http://127.0.0.1:8000/sistema`
 
 ## Instalador completo automatico (VPS e Windows)
 
