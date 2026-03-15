@@ -1,9 +1,7 @@
 const statusEl = document.getElementById("status");
 const outputEl = document.getElementById("output");
 const setupCard = document.getElementById("setupCard");
-const appCard = document.getElementById("appCard");
-const clienteCard = document.getElementById("clienteCard");
-const financeiroCard = document.getElementById("financeiroCard");
+const appWorkspace = document.getElementById("appWorkspace");
 
 function setStatus(message, ok = true) {
   statusEl.innerHTML = `<div class="status ${ok ? "ok" : "err"}">${message}</div>`;
@@ -27,9 +25,7 @@ function clearToken() {
 
 function refreshAuthUI() {
   const hasToken = !!getToken();
-  appCard.classList.toggle("hidden", !hasToken);
-  clienteCard.classList.toggle("hidden", !hasToken);
-  financeiroCard.classList.toggle("hidden", !hasToken);
+  appWorkspace.classList.toggle("hidden", !hasToken);
 }
 
 async function request(path, { method = "GET", body, auth = false, form = false } = {}) {
@@ -120,6 +116,14 @@ document.getElementById("btnLogin").addEventListener("click", async () => {
     setStatus(err.message, false);
   }
 });
+
+const btnFillDefault = document.getElementById("btnFillDefault");
+if (btnFillDefault) {
+  btnFillDefault.addEventListener("click", () => {
+    document.getElementById("loginEmail").value = "admin@sysconta.com";
+    document.getElementById("loginSenha").value = "Admin@123456";
+  });
+}
 
 document.getElementById("btnMe").addEventListener("click", async () => {
   try {

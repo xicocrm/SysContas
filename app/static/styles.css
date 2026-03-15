@@ -1,28 +1,88 @@
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f3f5f7;
-  color: #1c2430;
+  font-family: Inter, Arial, sans-serif;
+  background: #eef2f7;
+  color: #1f2937;
 }
 
 .topbar {
-  background: #0f4c81;
+  background: linear-gradient(90deg, #0f4c81, #0a2f54);
   color: #fff;
-  padding: 14px 20px;
-  font-size: 20px;
+  padding: 16px 24px;
+  font-size: 22px;
   font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.auth-shell {
+  max-width: 1100px;
+  margin: 24px auto 12px;
+  padding: 0 16px;
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: 16px;
+}
+
+.auth-brand,
+.auth-login {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 8px 28px rgba(15, 23, 42, 0.1);
+  padding: 22px;
+}
+
+.auth-brand h1 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 28px;
+  line-height: 1.2;
+}
+
+.auth-brand p {
+  margin-top: 0;
+  color: #4b5563;
+}
+
+.auth-badge {
+  margin-top: 14px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #e9f2ff;
+  color: #0f4c81;
+}
+
+.auth-login h2 {
+  margin-top: 0;
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  color: #6b7280;
+  margin-top: 0;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.setup-inside {
+  margin-top: 10px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
 }
 
 .container {
   max-width: 1100px;
-  margin: 20px auto;
+  margin: 12px auto 20px;
   padding: 0 16px;
 }
 
 .card {
   background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08);
   padding: 16px;
   margin-bottom: 16px;
 }
@@ -63,13 +123,21 @@ button {
   background: #0f4c81;
   border: none;
   color: #fff;
-  border-radius: 6px;
+  border-radius: 8px;
   padding: 10px 14px;
   cursor: pointer;
+  font-weight: 600;
 }
 
 button.secondary {
   background: #6b7280;
+}
+
+.link-button {
+  background: transparent;
+  color: #0f4c81;
+  padding: 0;
+  text-decoration: underline;
 }
 
 .row-actions {
@@ -84,8 +152,8 @@ button.secondary {
 }
 
 .status {
-  padding: 10px;
-  border-radius: 6px;
+  padding: 10px 12px;
+  border-radius: 8px;
   margin-bottom: 8px;
   font-size: 14px;
 }
@@ -101,10 +169,16 @@ button.secondary {
 }
 
 pre {
-  background: #0f172a;
+  background: #0b1530;
   color: #d1d5db;
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 12px;
   overflow: auto;
   max-height: 280px;
+}
+
+@media (max-width: 920px) {
+  .auth-shell {
+    grid-template-columns: 1fr;
+  }
 }
