@@ -1,5 +1,6 @@
 const statusEl = document.getElementById("status");
 const outputEl = document.getElementById("output");
+const setupCard = document.getElementById("setupCard");
 const appCard = document.getElementById("appCard");
 const clienteCard = document.getElementById("clienteCard");
 const financeiroCard = document.getElementById("financeiroCard");
@@ -74,6 +75,10 @@ document.getElementById("btnCriarEmpresa").addEventListener("click", async () =>
   } catch (err) {
     setStatus(err.message, false);
   }
+});
+
+document.getElementById("btnToggleSetup").addEventListener("click", () => {
+  setupCard.classList.toggle("hidden");
 });
 
 document.getElementById("btnBootstrap").addEventListener("click", async () => {
@@ -189,3 +194,10 @@ document.getElementById("btnCriarReceber").addEventListener("click", async () =>
 });
 
 refreshAuthUI();
+
+if (!document.getElementById("loginEmail").value) {
+  document.getElementById("loginEmail").value = "admin@sysconta.com";
+}
+if (!document.getElementById("loginSenha").value) {
+  document.getElementById("loginSenha").value = "Admin@123456";
+}

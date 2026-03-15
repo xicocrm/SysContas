@@ -23,6 +23,11 @@ NGINX_SITE="/etc/nginx/sites-available/sysconta"
 NGINX_LINK="/etc/nginx/sites-enabled/sysconta"
 HEALTH_URL="http://127.0.0.1:${APP_PORT}/health"
 MAX_RETRIES="${MAX_RETRIES:-8}"
+SEED_ADMIN_NAME="${SEED_ADMIN_NAME:-Administrador}"
+SEED_ADMIN_EMAIL="${SEED_ADMIN_EMAIL:-admin@sysconta.com}"
+SEED_ADMIN_PASSWORD="${SEED_ADMIN_PASSWORD:-Admin@123456}"
+SEED_COMPANY_NAME="${SEED_COMPANY_NAME:-Empresa Principal}"
+SEED_COMPANY_CNPJ="${SEED_COMPANY_CNPJ:-00000000000191}"
 
 log() {
   printf '[%s] %s\n' "$(date '+%F %T')" "$*"
@@ -127,25 +132,32 @@ sync_source() {
 
 ensure_env_file() {
   local env_file="${CURRENT_DIR}/.env"
-  if [[ -f "${env_file}" ]]; then
-    return 0
-  fi
-  local secret
-  secret="$(openssl rand -hex 32 2>/dev/null || true)"
-  if [[ -z "${secret}" ]]; then
-    secret="$(python3 - <<'PY'
+  if [[ ! -f "${env_file}" ]]; then
+    local secret
+    secret="$(openssl rand -hex 32 2>/dev/null || true)"
+    if [[ -z "${secret}" ]]; then
+      secret="$(python3 - <<'PY'
 import secrets
 print(secrets.token_hex(32))
 PY
 )"
-  fi
-  cat >"${env_file}" <<EOF
+    fi
+    cat >"${env_file}" <<EOF
 APP_NAME=SysConta API
 ENVIRONMENT=prod
 SECRET_KEY=${secret}
 TOKEN_EXPIRE_MINUTES=1440
 DATABASE_URL=sqlite:///./sysconta.db
 EOF
+  fi
+
+  grep -q '^AUTO_SEED_ADMIN=' "${env_file}" || echo "AUTO_SEED_ADMIN=true" >> "${env_file}"
+  grep -q '^SEED_ADMIN_NAME=' "${env_file}" || echo "SEED_ADMIN_NAME=${SEED_ADMIN_NAME}" >> "${env_file}"
+  grep -q '^SEED_ADMIN_EMAIL=' "${env_file}" || echo "SEED_ADMIN_EMAIL=${SEED_ADMIN_EMAIL}" >> "${env_file}"
+  grep -q '^SEED_ADMIN_PASSWORD=' "${env_file}" || echo "SEED_ADMIN_PASSWORD=${SEED_ADMIN_PASSWORD}" >> "${env_file}"
+  grep -q '^SEED_COMPANY_NAME=' "${env_file}" || echo "SEED_COMPANY_NAME=${SEED_COMPANY_NAME}" >> "${env_file}"
+  grep -q '^SEED_COMPANY_CNPJ=' "${env_file}" || echo "SEED_COMPANY_CNPJ=${SEED_COMPANY_CNPJ}" >> "${env_file}"
+
   chown "${APP_USER}:${APP_GROUP}" "${env_file}"
 }
 
@@ -159,6 +171,11 @@ setup_python_env() {
 
   retry "${MAX_RETRIES}" 2 "instalar requirements" \
     "${VENV_DIR}/bin/python" -m pip install -r "${CURRENT_DIR}/requirements.txt"
+}
+
+seed_admin_user() {
+  retry "${MAX_RETRIES}" 2 "criar/ajustar admin inicial" \
+    bash -c "cd '${CURRENT_DIR}' && ${VENV_DIR}/bin/python -m app.scripts.ensure_admin"
 }
 
 write_systemd_service() {
@@ -264,6 +281,7 @@ main() {
   sync_source
   ensure_env_file
   setup_python_env
+  seed_admin_user
   write_systemd_service
   configure_nginx
 
@@ -274,6 +292,7 @@ main() {
 
   log "INSTALACAO CONCLUIDA COM SUCESSO."
   log "Servico: $(systemctl is-active sysconta.service 2>/dev/null || echo 'docker-fallback')"
+  log "Login inicial: ${SEED_ADMIN_EMAIL} / ${SEED_ADMIN_PASSWORD}"
   log "Acesse: http://$(hostname -I | awk '{print $1}')/docs"
 }
 

@@ -3,7 +3,9 @@ param(
     [int]$Port = 8000,
     [int]$MaxRetries = 8,
     [string]$RepoUrl = "https://github.com/xicocrm/SysContas.git",
-    [string]$RepoBranch = "cursor/sistema-sysconta-completo-52c3"
+    [string]$RepoBranch = "cursor/sistema-sysconta-completo-52c3",
+    [string]$SeedAdminEmail = "admin@sysconta.com",
+    [string]$SeedAdminPassword = "Admin@123456"
 )
 
 Set-StrictMode -Version Latest
@@ -237,7 +239,25 @@ ENVIRONMENT=prod
 SECRET_KEY=$secret
 TOKEN_EXPIRE_MINUTES=1440
 DATABASE_URL=sqlite:///./sysconta.db
+AUTO_SEED_ADMIN=true
+SEED_ADMIN_NAME=Administrador
+SEED_ADMIN_EMAIL=$SeedAdminEmail
+SEED_ADMIN_PASSWORD=$SeedAdminPassword
+SEED_COMPANY_NAME=Empresa Principal
+SEED_COMPANY_CNPJ=00000000000191
 "@ | Out-File -FilePath $envFile -Encoding UTF8 -Force
+    } else {
+        $content = Get-Content $envFile -Raw
+        if ($content -notmatch "(?m)^AUTO_SEED_ADMIN=") { Add-Content $envFile "AUTO_SEED_ADMIN=true" }
+        if ($content -notmatch "(?m)^SEED_ADMIN_NAME=") { Add-Content $envFile "SEED_ADMIN_NAME=Administrador" }
+        if ($content -notmatch "(?m)^SEED_ADMIN_EMAIL=") { Add-Content $envFile "SEED_ADMIN_EMAIL=$SeedAdminEmail" }
+        if ($content -notmatch "(?m)^SEED_ADMIN_PASSWORD=") { Add-Content $envFile "SEED_ADMIN_PASSWORD=$SeedAdminPassword" }
+        if ($content -notmatch "(?m)^SEED_COMPANY_NAME=") { Add-Content $envFile "SEED_COMPANY_NAME=Empresa Principal" }
+        if ($content -notmatch "(?m)^SEED_COMPANY_CNPJ=") { Add-Content $envFile "SEED_COMPANY_CNPJ=00000000000191" }
+    }
+
+    Invoke-WithRetry -Description "criar/ajustar admin inicial" -Attempts $MaxRetries -Action {
+        & $pythonExe -m app.scripts.ensure_admin
     }
 
     $serviceName = "SysContaAPI"
@@ -253,6 +273,7 @@ DATABASE_URL=sqlite:///./sysconta.db
     Healthcheck-WithSelfHeal -ServiceName $serviceName -PythonExe $pythonExe -AppDir $DeployDir -ServicePort $Port
 
     Write-Log "INSTALACAO CONCLUIDA COM SUCESSO."
+    Write-Log "Login inicial: $SeedAdminEmail / $SeedAdminPassword"
     Write-Log "Acesse: http://localhost:$Port/docs"
 } catch {
     Write-Log "ERRO FATAL: $($_.Exception.Message)"

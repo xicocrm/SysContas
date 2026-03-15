@@ -11,8 +11,19 @@
     <div class="container">
       <div id="status"></div>
 
-      <div class="card" id="setupCard">
-        <h2>1) Setup inicial (somente na primeira vez)</h2>
+      <div class="card">
+        <h2>Acesso rapido</h2>
+        <p>
+          Entre com o administrador padrao:
+          <b>admin@sysconta.com</b> / <b>Admin@123456</b>.
+        </p>
+        <p>
+          Depois de entrar, voce pode cadastrar usuarios e alterar senha.
+        </p>
+      </div>
+
+      <div class="card hidden" id="setupCard">
+        <h2>Setup tecnico (somente se precisar)</h2>
         <div class="grid">
           <div>
             <label>Nome da empresa</label>
@@ -51,7 +62,7 @@
       </div>
 
       <div class="card" id="loginCard">
-        <h2>2) Login</h2>
+        <h2>Login</h2>
         <div class="grid">
           <div>
             <label>E-mail</label>
@@ -65,6 +76,10 @@
         <div class="row-actions">
           <button id="btnLogin">Entrar no sistema</button>
         </div>
+      </div>
+
+      <div class="row-actions">
+        <button class="secondary" id="btnToggleSetup">Mostrar/Ocultar setup tecnico</button>
       </div>
 
       <div class="card hidden" id="appCard">

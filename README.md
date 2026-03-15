@@ -76,6 +76,15 @@ uvicorn app.main:app --reload
 Swagger: `http://127.0.0.1:8000/docs`
 Sistema web (login/painel): `http://127.0.0.1:8000/` ou `http://127.0.0.1:8000/sistema`
 
+### Acesso simples (sem complicacao)
+
+A instalacao agora cria/garante automaticamente um admin inicial:
+
+- Email: `admin@sysconta.com`
+- Senha: `Admin@123456`
+
+Voce pode entrar direto no sistema web e depois trocar senha/usuarios.
+
 ## Instalador completo automatico (VPS e Windows)
 
 O projeto agora inclui instaladores com:
@@ -115,6 +124,7 @@ O instalador Linux faz automaticamente:
 - instalacao de Python, Nginx, Git, OpenSSL e utilitarios
 - virtualenv + instalacao de requirements
 - criacao de `.env` com `SECRET_KEY`
+- criacao/garantia do admin inicial automaticamente
 - configuracao de `systemd` para API
 - configuracao de Nginx reverse proxy
 - healthcheck da API
@@ -145,6 +155,7 @@ O instalador Windows faz automaticamente:
 - copia/sincronizacao de codigo para pasta de deploy
 - virtualenv + requirements
 - criacao de `.env` com `SECRET_KEY`
+- criacao/garantia do admin inicial automaticamente
 - criacao e inicializacao de servico `SysContaAPI`
 - regra de firewall para porta da API
 - healthcheck com autocorrecao (restart de servico + reinstall deps)

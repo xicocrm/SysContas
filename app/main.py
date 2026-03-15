@@ -19,6 +19,7 @@ from app.routers import (
     portal,
     web,
 )
+from app.services.bootstrap_admin import ensure_seed_admin
 
 app = FastAPI(title=settings.app_name)
 
@@ -34,6 +35,7 @@ app.add_middleware(
 @app.on_event("startup")
 def on_startup() -> None:
     create_db_and_tables()
+    ensure_seed_admin()
 
 
 app.include_router(health.router)
