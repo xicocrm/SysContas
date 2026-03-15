@@ -149,6 +149,10 @@ O instalador Windows faz automaticamente:
 - regra de firewall para porta da API
 - healthcheck com autocorrecao (restart de servico + reinstall deps)
 
+### Observacao de autenticacao
+
+As senhas agora usam `pbkdf2_sha256` (passlib), evitando incompatibilidades de backend bcrypt em alguns servidores Linux.
+
 ## Configuração por variáveis de ambiente
 
 Crie um arquivo `.env`:
