@@ -93,7 +93,22 @@
         </div>
       </div>
 
-      <div class="card" id="clienteCard">
+      <div class="card">
+        <h2>Módulos do SysConta</h2>
+        <div class="module-grid">
+          <button class="module-btn" data-module="cadastros">Cadastros</button>
+          <button class="module-btn" data-module="financeiro">Financeiro</button>
+          <button class="module-btn" data-module="comercial">Comercial</button>
+          <button class="module-btn" data-module="juridico">Jurídico</button>
+          <button class="module-btn" data-module="campanhas">Campanhas</button>
+          <button class="module-btn" data-module="integracoes">Integrações</button>
+          <button class="module-btn" data-module="configuracoes">Configurações</button>
+          <button class="module-btn" data-module="portal">Portal do cliente</button>
+          <button class="module-btn" data-module="notificacoes">Notificações</button>
+        </div>
+      </div>
+
+      <div class="card module-section" id="module-cadastros">
         <h2>Cadastro de cliente (CPF/CNPJ)</h2>
         <div class="grid">
           <div>
@@ -138,7 +153,7 @@
         </div>
       </div>
 
-      <div class="card" id="financeiroCard">
+      <div class="card module-section hidden" id="module-financeiro">
         <h2>Conta a receber</h2>
         <div class="grid">
           <div>
@@ -165,6 +180,48 @@
         <div class="row-actions">
           <button id="btnCriarReceber">Salvar conta a receber</button>
         </div>
+      </div>
+
+      <div class="card module-section hidden" id="module-comercial">
+        <h2>Módulo Comercial</h2>
+        <p>Negociações, propostas e contratos.</p>
+        <p>Use os endpoints: <b>/comercial/negociacoes</b>, <b>/comercial/propostas</b>, <b>/comercial/contratos</b>.</p>
+      </div>
+
+      <div class="card module-section hidden" id="module-juridico">
+        <h2>Módulo Jurídico</h2>
+        <p>Processos e protocolos.</p>
+        <p>Use os endpoints: <b>/juridico/processos</b>, <b>/juridico/protocolos</b>.</p>
+      </div>
+
+      <div class="card module-section hidden" id="module-campanhas">
+        <h2>Módulo Campanhas</h2>
+        <p>Campanhas de comunicação e relacionamento.</p>
+        <p>Use o endpoint: <b>/campanhas</b>.</p>
+      </div>
+
+      <div class="card module-section hidden" id="module-integracoes">
+        <h2>Módulo Integrações</h2>
+        <p>APIs de atendimento e bancos.</p>
+        <p>Use os endpoints: <b>/integracoes/canais</b>, <b>/integracoes/bancos</b>, <b>/integracoes/{empresa_id}</b>.</p>
+      </div>
+
+      <div class="card module-section hidden" id="module-configuracoes">
+        <h2>Módulo Configurações</h2>
+        <p>Permissões de usuário e bancos de dados.</p>
+        <p>Use os endpoints: <b>/configuracoes/*</b>.</p>
+      </div>
+
+      <div class="card module-section hidden" id="module-portal">
+        <h2>Módulo Portal do Cliente</h2>
+        <p>Acesso por CPF/CNPJ para ver contas e dados.</p>
+        <p>Use os endpoints: <b>/portal/login</b>, <b>/portal/me</b>, <b>/portal/me/contas-receber</b>.</p>
+      </div>
+
+      <div class="card module-section hidden" id="module-notificacoes">
+        <h2>Módulo Notificações</h2>
+        <p>Envio de notificações por e-mail e WhatsApp.</p>
+        <p>Use o endpoint: <b>/notificacoes/enviar</b>.</p>
       </div>
 
       <div class="card">

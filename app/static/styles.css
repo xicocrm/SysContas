@@ -74,6 +74,23 @@ body {
   font-size: 18px;
 }
 
+.module-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 8px;
+}
+
+.module-btn {
+  background: #dbeafe;
+  color: #0f4c81;
+  border: 1px solid #bfdbfe;
+}
+
+.module-btn.active {
+  background: #0f4c81;
+  color: #fff;
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));

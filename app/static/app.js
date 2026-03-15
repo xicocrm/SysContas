@@ -3,6 +3,8 @@ const outputEl = document.getElementById("output");
 const setupCard = document.getElementById("setupCard");
 const appWorkspace = document.getElementById("appWorkspace");
 const authShell = document.getElementById("authShell");
+const moduleButtons = document.querySelectorAll(".module-btn");
+const moduleSections = document.querySelectorAll(".module-section");
 
 function byId(id) {
   return document.getElementById(id);
@@ -39,10 +41,27 @@ function clearToken() {
   localStorage.removeItem("sysconta_token");
 }
 
+function activateModule(moduleName) {
+  moduleSections.forEach((section) => section.classList.add("hidden"));
+  moduleButtons.forEach((btn) => btn.classList.remove("active"));
+
+  const target = byId(`module-${moduleName}`);
+  if (target) {
+    target.classList.remove("hidden");
+  }
+  const activeBtn = document.querySelector(`.module-btn[data-module="${moduleName}"]`);
+  if (activeBtn) {
+    activeBtn.classList.add("active");
+  }
+}
+
 function refreshAuthUI() {
   const hasToken = !!getToken();
   if (appWorkspace) appWorkspace.classList.toggle("hidden", !hasToken);
   if (authShell) authShell.classList.toggle("hidden", hasToken);
+  if (hasToken) {
+    activateModule("cadastros");
+  }
 }
 
 async function request(path, { method = "GET", body, auth = false, form = false } = {}) {
@@ -141,6 +160,15 @@ onClick("btnLogin", async () => {
 onClick("btnFillDefault", () => {
   byId("loginEmail").value = "admin@sysconta.com";
   byId("loginSenha").value = "Admin@123456";
+});
+
+moduleButtons.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const moduleName = btn.getAttribute("data-module");
+    if (moduleName) {
+      activateModule(moduleName);
+    }
+  });
 });
 
 onClick("btnMe", async () => {
