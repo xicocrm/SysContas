@@ -1,0 +1,14 @@
+services:
+  sysconta-api:
+    build: .
+    container_name: sysconta-api
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_NAME=SysConta API
+      - ENVIRONMENT=prod
+      - SECRET_KEY=change-this-secret
+      - TOKEN_EXPIRE_MINUTES=1440
+      - DATABASE_URL=sqlite:///./sysconta.db
+    volumes:
+      - ./:/app

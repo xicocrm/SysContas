@@ -1,1 +1,127 @@
-# SysContas
+# SysConta API (MVP Profissional)
+
+Backend base para um sistema **SysConta** com foco em:
+
+- Multiempresa e multiusuário
+- Gestão de usuários e permissões por módulo
+- Cadastro completo de escritórios e clientes (CPF/CNPJ)
+- Busca automática de dados por CNPJ (fonte pública) e endereço por CEP
+- Contas a pagar e receber
+- Negociações, propostas, contratos
+- Processos e protocolos
+- Campanhas
+- Portal do cliente (acesso por CPF/CNPJ + senha, com bloqueio)
+- Notificações por e-mail e WhatsApp (via integrações cadastradas)
+- Estrutura de integrações com canais e bancos
+
+## Módulos disponíveis
+
+- `Auth`: autenticação JWT, bootstrap de admin e cadastro de usuários
+- `Empresas`: empresas e escritórios
+- `Clientes`: cadastro com CPF/CNPJ, lookup CNPJ/CEP, bloqueio de portal
+- `Financeiro`: contas a pagar/receber e resumo financeiro
+- `Comercial`: negociações, propostas e contratos
+- `Jurídico`: processos e protocolos
+- `Campanhas`: campanhas de comunicação
+- `Integrações`: canais e bancos
+- `Portal`: login do cliente e consulta de contas a receber
+- `Configurações`: permissões de usuários
+- `Notificações`: envio integrado (MVP)
+
+## Integrações suportadas (cadastro)
+
+### Canais/API
+
+- wavoip
+- a-api
+- fale_paco
+- wlaticket
+- whatsapp
+- facebook
+- instagram
+
+### Bancos/gateways
+
+- asaas
+- inter
+- efi
+- cora
+- mercado_pago
+- pagbank
+- bradesco
+- itau
+- banco_do_brasil
+- caixa
+
+> Observação: a estrutura de credenciais e ativação está pronta. A chamada transacional de cada fornecedor pode ser plugada no serviço correspondente.
+
+## Executar localmente
+
+### 1) Criar ambiente e instalar dependências
+
+```bash
+python -m venv .venv
+source .venv/bin/activate  # Linux/macOS
+# .venv\Scripts\activate   # Windows PowerShell
+pip install -r requirements.txt
+```
+
+### 2) Rodar API
+
+```bash
+uvicorn app.main:app --reload
+```
+
+Swagger: `http://127.0.0.1:8000/docs`
+
+## Configuração por variáveis de ambiente
+
+Crie um arquivo `.env`:
+
+```env
+APP_NAME=SysConta API
+ENVIRONMENT=prod
+SECRET_KEY=troque-esta-chave-em-producao
+TOKEN_EXPIRE_MINUTES=1440
+DATABASE_URL=sqlite:///./sysconta.db
+```
+
+## Fluxo inicial recomendado
+
+1. Criar empresa em `POST /empresas`
+2. Executar bootstrap de admin em `POST /auth/bootstrap`
+3. Fazer login admin em `POST /auth/login`
+4. Criar usuários com permissões em `POST /auth/users`
+5. Cadastrar integrações em `/integracoes/canais` e `/integracoes/bancos`
+6. Cadastrar clientes por CPF/CNPJ em `/clientes`
+
+## Segurança e boas práticas implementadas
+
+- JWT para autenticação
+- Hash de senha com bcrypt
+- Isolamento por empresa (tenant)
+- Controle de permissões por módulo
+- Portal do cliente com bloqueio manual
+
+## Deploy em VPS (Linux) e Windows
+
+### VPS Linux (recomendado)
+
+- Usar `systemd` + `uvicorn`/`gunicorn` atrás de `Nginx`
+- Banco recomendado para produção: PostgreSQL
+- Ativar HTTPS com certbot
+- Definir `SECRET_KEY` forte e segredos de integração via variáveis de ambiente
+
+### Windows Server
+
+- Rodar com `uvicorn app.main:app --host 0.0.0.0 --port 8000`
+- Configurar serviço com NSSM/Task Scheduler
+- Reverse proxy com IIS (ARR) se necessário
+
+## Próximos passos (produção enterprise)
+
+- Migrations com Alembic
+- Auditoria detalhada e trilhas LGPD
+- Fila de jobs (Celery/RQ) para notificações
+- Integrações transacionais completas (Asaas, Inter, WhatsApp APIs etc.)
+- Frontend web e app com UX completa
