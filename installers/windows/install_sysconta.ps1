@@ -1,7 +1,9 @@
 param(
     [string]$DeployDir = "C:\SysConta",
     [int]$Port = 8000,
-    [int]$MaxRetries = 8
+    [int]$MaxRetries = 8,
+    [string]$RepoUrl = "https://github.com/xicocrm/SysContas.git",
+    [string]$RepoBranch = "cursor/sistema-sysconta-completo-52c3"
 )
 
 Set-StrictMode -Version Latest
@@ -78,6 +80,16 @@ function Ensure-Nssm {
     Ensure-Choco
     Invoke-WithRetry -Description "instalar NSSM" -Attempts $MaxRetries -Action {
         choco install -y nssm --no-progress
+    }
+}
+
+function Ensure-Git {
+    if (Get-Command git -ErrorAction SilentlyContinue) {
+        return
+    }
+    Ensure-Choco
+    Invoke-WithRetry -Description "instalar Git" -Attempts $MaxRetries -Action {
+        choco install -y git --no-progress
     }
 }
 
@@ -168,9 +180,25 @@ try {
     Assert-Admin
     Write-Log "Iniciando instalacao automatica SysConta (Windows)..."
 
-    $repoRoot = (Resolve-Path "$PSScriptRoot\..\..").Path
-    if (-not (Test-Path "$repoRoot\app")) {
-        throw "Codigo-fonte nao encontrado em $repoRoot"
+    $repoRoot = (Resolve-Path "$PSScriptRoot\..\.." -ErrorAction SilentlyContinue).Path
+    if (-not $repoRoot -or -not (Test-Path "$repoRoot\app")) {
+        if (Test-Path "$PWD\app") {
+            $repoRoot = $PWD.Path
+            Write-Log "Usando codigo-fonte local em $repoRoot"
+        } else {
+            Write-Log "Codigo-fonte local nao encontrado. Clonando automaticamente..."
+            Ensure-Git
+            $repoRoot = Join-Path $env:TEMP "sysconta-source"
+            if (Test-Path $repoRoot) {
+                Remove-Item -Path $repoRoot -Recurse -Force -ErrorAction SilentlyContinue
+            }
+            Invoke-WithRetry -Description "clonar repositorio" -Attempts $MaxRetries -Action {
+                git clone --depth 1 --branch $RepoBranch $RepoUrl $repoRoot
+            }
+            if (-not (Test-Path "$repoRoot\app")) {
+                throw "Repositorio clonado, mas pasta app nao foi encontrada."
+            }
+        }
     }
 
     Ensure-Python

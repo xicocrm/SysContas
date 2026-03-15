@@ -9,11 +9,15 @@ APP_PORT="${APP_PORT:-8000}"
 APP_HOST="${APP_HOST:-127.0.0.1}"
 DOMAIN="${DOMAIN:-_}"
 DEPLOY_ROOT="${DEPLOY_ROOT:-/opt/sysconta}"
-REPO_URL="${SYSCONTA_REPO_URL:-}"
+DEFAULT_REPO_URL="https://github.com/xicocrm/SysContas.git"
+DEFAULT_REPO_BRANCH="cursor/sistema-sysconta-completo-52c3"
+REPO_URL="${SYSCONTA_REPO_URL:-${DEFAULT_REPO_URL}}"
+REPO_BRANCH="${SYSCONTA_REPO_BRANCH:-${DEFAULT_REPO_BRANCH}}"
 SOURCE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 CURRENT_DIR="${DEPLOY_ROOT}/current"
 VENV_DIR="${DEPLOY_ROOT}/venv"
 LOG_DIR="/var/log/sysconta"
+SOURCE_CACHE_DIR="${DEPLOY_ROOT}/source"
 SERVICE_FILE="/etc/systemd/system/sysconta.service"
 NGINX_SITE="/etc/nginx/sites-available/sysconta"
 NGINX_LINK="/etc/nginx/sites-enabled/sysconta"
@@ -70,18 +74,44 @@ ensure_user_and_dirs() {
 }
 
 prepare_source() {
+  # Prioriza a pasta onde o script esta versionado.
   if [[ -d "${SOURCE_ROOT}/app" ]]; then
-    log "Usando fonte local em ${SOURCE_ROOT}"
+    log "Usando fonte local (script-dir) em ${SOURCE_ROOT}"
     return 0
   fi
+
+  # Fallback: se o operador estiver no repositorio certo, usa a cwd.
+  if [[ -d "${PWD}/app" ]]; then
+    SOURCE_ROOT="${PWD}"
+    log "Usando fonte local (cwd) em ${SOURCE_ROOT}"
+    return 0
+  fi
+
   if [[ -z "${REPO_URL}" ]]; then
-    log "ERRO: código-fonte não encontrado e SYSCONTA_REPO_URL não informado."
+    log "ERRO: codigo-fonte nao encontrado e SYSCONTA_REPO_URL nao informado."
     return 1
   fi
-  log "Fonte local não encontrada. Clonando ${REPO_URL}..."
-  rm -rf "${DEPLOY_ROOT}/source"
-  retry "${MAX_RETRIES}" 2 "clone do repositório" git clone "${REPO_URL}" "${DEPLOY_ROOT}/source"
-  SOURCE_ROOT="${DEPLOY_ROOT}/source"
+
+  log "Fonte local nao encontrada. Clonando automaticamente ${REPO_URL} (branch ${REPO_BRANCH})..."
+  rm -rf "${SOURCE_CACHE_DIR}"
+  retry "${MAX_RETRIES}" 2 "clone do repositorio" \
+    git clone --depth 1 --branch "${REPO_BRANCH}" "${REPO_URL}" "${SOURCE_CACHE_DIR}"
+
+  if [[ ! -d "${SOURCE_CACHE_DIR}/app" ]]; then
+    log "Branch clonada sem pasta app. Tentando checkout/fetch automatico..."
+    retry "${MAX_RETRIES}" 2 "fetch branch alvo" \
+      git -C "${SOURCE_CACHE_DIR}" fetch origin "${REPO_BRANCH}"
+    retry "${MAX_RETRIES}" 2 "checkout branch alvo" \
+      git -C "${SOURCE_CACHE_DIR}" checkout "${REPO_BRANCH}"
+  fi
+
+  if [[ ! -d "${SOURCE_CACHE_DIR}/app" ]]; then
+    log "ERRO: repositorio clonado, mas pasta app nao foi encontrada."
+    return 1
+  fi
+
+  SOURCE_ROOT="${SOURCE_CACHE_DIR}"
+  log "Fonte pronta em ${SOURCE_ROOT}"
 }
 
 sync_source() {
@@ -203,8 +233,13 @@ fallback_docker_deploy() {
   systemctl restart docker || true
   systemctl stop sysconta.service || true
 
-  retry "${MAX_RETRIES}" 2 "docker compose build/up" \
-    bash -c "cd '${CURRENT_DIR}' && docker compose up -d --build"
+  if command -v docker >/dev/null 2>&1; then
+    retry "${MAX_RETRIES}" 2 "docker compose build/up" \
+      bash -c "cd '${CURRENT_DIR}' && (docker compose up -d --build || docker-compose up -d --build)"
+  else
+    log "ERRO: docker nao disponivel apos instalacao."
+    return 1
+  fi
 
   local attempts=1
   while (( attempts <= 20 )); do
@@ -238,6 +273,7 @@ main() {
   fi
 
   log "INSTALACAO CONCLUIDA COM SUCESSO."
+  log "Servico: $(systemctl is-active sysconta.service 2>/dev/null || echo 'docker-fallback')"
   log "Acesse: http://$(hostname -I | awk '{print $1}')/docs"
 }
 

@@ -93,12 +93,19 @@ Arquivo: `installers/vps/install_sysconta.sh`
 sudo bash installers/vps/install_sysconta.sh
 ```
 
+Se voce estiver fora do repositorio, pode executar direto pela internet:
+
+```bash
+curl -fsSL "https://raw.githubusercontent.com/xicocrm/SysContas/cursor/sistema-sysconta-completo-52c3/installers/vps/install_sysconta.sh" -o /tmp/install_sysconta.sh && sudo bash /tmp/install_sysconta.sh
+```
+
 Variaveis opcionais:
 
 - `APP_PORT` (padrao: `8000`)
 - `DOMAIN` (padrao: `_`)
 - `DEPLOY_ROOT` (padrao: `/opt/sysconta`)
-- `SYSCONTA_REPO_URL` (usa clone automatico se a pasta atual nao tiver o codigo)
+- `SYSCONTA_REPO_URL` (padrao: `https://github.com/xicocrm/SysContas.git`)
+- `SYSCONTA_REPO_BRANCH` (padrao: `cursor/sistema-sysconta-completo-52c3`)
 - `MAX_RETRIES` (padrao: `8`)
 
 O instalador Linux faz automaticamente:
@@ -127,6 +134,8 @@ Parametros opcionais:
 - `-DeployDir "C:\SysConta"`
 - `-Port 8000`
 - `-MaxRetries 8`
+- `-RepoUrl "https://github.com/xicocrm/SysContas.git"`
+- `-RepoBranch "cursor/sistema-sysconta-completo-52c3"`
 
 O instalador Windows faz automaticamente:
 
