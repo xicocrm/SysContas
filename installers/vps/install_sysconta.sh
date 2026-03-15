@@ -175,6 +175,7 @@ setup_python_env() {
 
 seed_admin_user() {
   local py_bin="${VENV_DIR}/bin/python"
+  local seed_module_file="${CURRENT_DIR}/app/scripts/ensure_admin.py"
 
   seed_admin_user_module() {
     cd "${CURRENT_DIR}"
@@ -264,11 +265,15 @@ with Session(engine) as session:
 PY
   }
 
-  if retry "${MAX_RETRIES}" 2 "criar/ajustar admin inicial (modulo)" seed_admin_user_module; then
-    return 0
+  if [[ -f "${seed_module_file}" ]]; then
+    if retry 2 1 "criar/ajustar admin inicial (modulo)" seed_admin_user_module; then
+      return 0
+    fi
+    log "Modulo presente, mas falhou. Aplicando fallback inline..."
+  else
+    log "Modulo de seed nao encontrado (${seed_module_file}). Aplicando fallback inline..."
   fi
 
-  log "Modulo de seed nao encontrado. Aplicando fallback inline..."
   retry "${MAX_RETRIES}" 2 "criar/ajustar admin inicial (fallback)" seed_admin_user_inline
 }
 
