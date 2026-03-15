@@ -1,12 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
+from sqlalchemy.exc import SQLAlchemyError
 from sqlmodel import Session, select
 
 from app.core.security import create_access_token, get_password_hash, verify_password
-from app.db import get_session
+from app.db import create_db_and_tables, get_session
 from app.deps import get_current_user
 from app.models import Empresa, User
 from app.schemas import Message, Token, UserCreate, UserRead
+from app.services.bootstrap_admin import ensure_seed_admin
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
@@ -82,7 +84,22 @@ def create_user(
 
 @router.post("/login", response_model=Token)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), session: Session = Depends(get_session)) -> Token:
-    user = session.exec(select(User).where(User.email == form_data.username)).first()
+    try:
+        user = session.exec(select(User).where(User.email == form_data.username)).first()
+    except SQLAlchemyError:
+        session.rollback()
+        # Self-heal path: recreate schema and seed admin if DB is inconsistent.
+        create_db_and_tables()
+        ensure_seed_admin()
+        try:
+            user = session.exec(select(User).where(User.email == form_data.username)).first()
+        except SQLAlchemyError:
+            session.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Banco indisponível temporariamente. Tente novamente em instantes.",
+            )
+
     if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Credenciais inválidas.")
 
