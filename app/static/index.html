@@ -12,89 +12,41 @@
     <section class="login-page" id="authShell">
       <div class="login-card" id="loginCard">
         <h1>Entrar no sistema</h1>
-        <p>Informe seu e-mail e senha para acessar o painel.</p>
+        <p>Login rápido para acessar os módulos.</p>
         <div id="status"></div>
-
         <div class="form-grid">
           <div>
             <label>E-mail</label>
-            <input id="loginEmail" placeholder="seu-email@dominio.com" />
+            <input id="loginEmail" placeholder="admin@sysconta.com" />
           </div>
           <div>
             <label>Senha</label>
             <input id="loginSenha" type="password" placeholder="Sua senha" />
           </div>
         </div>
-
         <div class="row-actions">
           <button id="btnLogin">Entrar</button>
-          <button class="secondary" id="btnFillDefault" type="button">Usar acesso padrão</button>
+          <button class="secondary" id="btnFillDefault" type="button">Acesso padrão</button>
         </div>
-        <div class="row-actions">
-          <button class="link-button" id="btnToggleSetup" type="button">Mostrar setup técnico</button>
-        </div>
-
         <small class="login-help">
-          Primeiro acesso padrão: <b>admin@sysconta.com</b> / <b>Admin@123456</b>
+          Acesso inicial: <b>admin@sysconta.com</b> / <b>Admin@123456</b>
         </small>
-      </div>
-
-      <div class="card hidden" id="setupCard">
-        <h2>Setup técnico (somente se necessário)</h2>
-        <div class="grid">
-          <div>
-            <label>Nome da empresa</label>
-            <input id="empresaNome" placeholder="Meu Escritório" />
-          </div>
-          <div>
-            <label>CNPJ da empresa</label>
-            <input id="empresaCnpj" placeholder="12345678000199" />
-          </div>
-        </div>
-        <div class="row-actions">
-          <button id="btnCriarEmpresa">Criar empresa</button>
-        </div>
-        <hr />
-        <div class="grid">
-          <div>
-            <label>ID da empresa</label>
-            <input id="adminEmpresaId" placeholder="1" />
-          </div>
-          <div>
-            <label>Nome do administrador</label>
-            <input id="adminNome" placeholder="Administrador" />
-          </div>
-          <div>
-            <label>E-mail</label>
-            <input id="adminEmail" placeholder="admin@sysconta.com" />
-          </div>
-          <div>
-            <label>Senha</label>
-            <input id="adminSenha" type="password" placeholder="Senha forte" />
-          </div>
-        </div>
-        <div class="row-actions">
-          <button id="btnBootstrap">Criar primeiro administrador</button>
-          <button class="secondary" id="btnHideSetup">Ocultar setup técnico</button>
-        </div>
       </div>
     </section>
 
     <div class="container hidden" id="appWorkspace">
       <div class="card" id="appCard">
-        <h2>Painel do sistema</h2>
-        <p>
-          Usuário autenticado. Use os formulários para cadastro. Para operações avançadas,
-          continue usando <a href="/docs" target="_blank">/docs</a>.
+        <h2>Painel</h2>
+        <p class="inline-meta">
+          <span id="metaUser">Usuário: -</span> | <span id="metaEmpresa">Empresa: -</span>
         </p>
         <div class="row-actions">
-          <button id="btnMe">Ver meu usuário</button>
-          <button class="secondary" id="btnLogout">Sair</button>
+          <button id="btnLogout" class="secondary">Sair</button>
         </div>
       </div>
 
       <div class="card">
-        <h2>Módulos do SysConta</h2>
+        <h2>Módulos</h2>
         <div class="module-grid">
           <button class="module-btn" data-module="cadastros">Cadastros</button>
           <button class="module-btn" data-module="financeiro">Financeiro</button>
@@ -109,47 +61,86 @@
       </div>
 
       <div class="card module-section" id="module-cadastros">
-        <h2>Cadastro de cliente (CPF/CNPJ)</h2>
+        <h2>Cadastro rápido de cliente</h2>
         <div class="grid">
           <div>
-            <label>ID da empresa</label>
-            <input id="clienteEmpresaId" placeholder="1" />
-          </div>
-          <div>
-            <label>Tipo documento</label>
+            <label>Tipo</label>
             <select id="clienteTipo">
               <option value="cpf">CPF</option>
               <option value="cnpj">CNPJ</option>
             </select>
           </div>
           <div>
-            <label>Documento</label>
+            <label>CPF/CNPJ</label>
             <input id="clienteDocumento" placeholder="Somente números" />
           </div>
           <div>
             <label>Nome / Razão social</label>
-            <input id="clienteNome" />
-          </div>
-          <div>
-            <label>E-mail</label>
-            <input id="clienteEmail" />
+            <input id="clienteNome" placeholder="Nome do cliente" />
           </div>
           <div>
             <label>Telefone</label>
-            <input id="clienteTelefone" />
+            <input id="clienteTelefone" placeholder="(00) 00000-0000" />
           </div>
           <div>
-            <label>CEP</label>
-            <input id="clienteCep" />
+            <label>E-mail</label>
+            <input id="clienteEmail" placeholder="cliente@email.com" />
           </div>
           <div>
-            <label>Senha portal (opcional)</label>
-            <input id="clienteSenhaPortal" type="password" />
+            <label>Senha do portal (opcional)</label>
+            <input id="clienteSenhaPortal" type="password" placeholder="Mínimo 8 caracteres" />
           </div>
         </div>
+        <details class="optional-block">
+          <summary>Campos opcionais (endereço)</summary>
+          <div class="grid">
+            <div>
+              <label>CEP</label>
+              <input id="clienteCep" placeholder="00000000" />
+            </div>
+            <div>
+              <label>Endereço</label>
+              <input id="clienteEndereco" />
+            </div>
+            <div>
+              <label>Número</label>
+              <input id="clienteNumero" />
+            </div>
+            <div>
+              <label>Bairro</label>
+              <input id="clienteBairro" />
+            </div>
+            <div>
+              <label>Cidade</label>
+              <input id="clienteCidade" />
+            </div>
+            <div>
+              <label>Estado</label>
+              <input id="clienteEstado" />
+            </div>
+          </div>
+        </details>
         <div class="row-actions">
           <button id="btnCriarCliente">Salvar cliente</button>
-          <button class="secondary" id="btnListarClientes">Listar clientes</button>
+          <button class="secondary" id="btnListarClientes">Atualizar lista</button>
+        </div>
+      </div>
+
+      <div class="card module-section" id="module-cadastros-lista">
+        <h2>Clientes cadastrados</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Documento</th>
+                <th>E-mail</th>
+                <th>Telefone</th>
+              </tr>
+            </thead>
+            <tbody id="clientesTableBody"></tbody>
+          </table>
         </div>
       </div>
 
@@ -157,12 +148,8 @@
         <h2>Conta a receber</h2>
         <div class="grid">
           <div>
-            <label>ID empresa</label>
-            <input id="recEmpresaId" placeholder="1" />
-          </div>
-          <div>
-            <label>ID cliente</label>
-            <input id="recClienteId" placeholder="1" />
+            <label>Cliente</label>
+            <select id="recClienteId"></select>
           </div>
           <div>
             <label>Descrição</label>
@@ -183,53 +170,39 @@
       </div>
 
       <div class="card module-section hidden" id="module-comercial">
-        <h2>Módulo Comercial</h2>
-        <p>Negociações, propostas e contratos.</p>
-        <p>Use os endpoints: <b>/comercial/negociacoes</b>, <b>/comercial/propostas</b>, <b>/comercial/contratos</b>.</p>
+        <h2>Comercial</h2>
+        <p>Negociações, propostas e contratos disponíveis neste módulo.</p>
       </div>
-
       <div class="card module-section hidden" id="module-juridico">
-        <h2>Módulo Jurídico</h2>
-        <p>Processos e protocolos.</p>
-        <p>Use os endpoints: <b>/juridico/processos</b>, <b>/juridico/protocolos</b>.</p>
+        <h2>Jurídico</h2>
+        <p>Processos e protocolos disponíveis neste módulo.</p>
       </div>
-
       <div class="card module-section hidden" id="module-campanhas">
-        <h2>Módulo Campanhas</h2>
-        <p>Campanhas de comunicação e relacionamento.</p>
-        <p>Use o endpoint: <b>/campanhas</b>.</p>
+        <h2>Campanhas</h2>
+        <p>Gestão de campanhas de comunicação.</p>
       </div>
-
       <div class="card module-section hidden" id="module-integracoes">
-        <h2>Módulo Integrações</h2>
-        <p>APIs de atendimento e bancos.</p>
-        <p>Use os endpoints: <b>/integracoes/canais</b>, <b>/integracoes/bancos</b>, <b>/integracoes/{empresa_id}</b>.</p>
+        <h2>Integrações</h2>
+        <p>Configuração de APIs e bancos.</p>
       </div>
-
       <div class="card module-section hidden" id="module-configuracoes">
-        <h2>Módulo Configurações</h2>
-        <p>Permissões de usuário e bancos de dados.</p>
-        <p>Use os endpoints: <b>/configuracoes/*</b>.</p>
+        <h2>Configurações</h2>
+        <p>Permissões, usuários e bancos de dados da aplicação.</p>
       </div>
-
       <div class="card module-section hidden" id="module-portal">
-        <h2>Módulo Portal do Cliente</h2>
-        <p>Acesso por CPF/CNPJ para ver contas e dados.</p>
-        <p>Use os endpoints: <b>/portal/login</b>, <b>/portal/me</b>, <b>/portal/me/contas-receber</b>.</p>
+        <h2>Portal do cliente</h2>
+        <p>Acesso para cliente por CPF/CNPJ.</p>
       </div>
-
       <div class="card module-section hidden" id="module-notificacoes">
-        <h2>Módulo Notificações</h2>
+        <h2>Notificações</h2>
         <p>Envio de notificações por e-mail e WhatsApp.</p>
-        <p>Use o endpoint: <b>/notificacoes/enviar</b>.</p>
       </div>
 
       <div class="card">
         <h2>Resultado</h2>
         <pre id="output">{}</pre>
       </div>
-
     </div>
     <script src="/static/app.js"></script>
   </body>
-  </html>
+</html>

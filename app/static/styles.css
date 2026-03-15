@@ -145,6 +145,38 @@ button.secondary {
   margin-top: 8px;
 }
 
+.inline-meta {
+  color: #475569;
+  margin-top: 0;
+}
+
+.optional-block {
+  margin-top: 12px;
+}
+
+.optional-block summary {
+  cursor: pointer;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.table-wrap {
+  overflow: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 8px 6px;
+  font-size: 14px;
+}
+
 .row-actions {
   display: flex;
   gap: 8px;

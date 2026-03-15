@@ -1,20 +1,24 @@
 const statusEl = document.getElementById("status");
 const outputEl = document.getElementById("output");
-const setupCard = document.getElementById("setupCard");
 const appWorkspace = document.getElementById("appWorkspace");
 const authShell = document.getElementById("authShell");
 const moduleButtons = document.querySelectorAll(".module-btn");
 const moduleSections = document.querySelectorAll(".module-section");
+
+const state = {
+  token: localStorage.getItem("sysconta_token"),
+  user: null,
+  empresaId: null,
+  clientes: [],
+};
 
 function byId(id) {
   return document.getElementById(id);
 }
 
 function onClick(id, handler) {
-  const element = byId(id);
-  if (element) {
-    element.addEventListener("click", handler);
-  }
+  const el = byId(id);
+  if (el) el.addEventListener("click", handler);
 }
 
 function setStatus(message, ok = true) {
@@ -24,20 +28,16 @@ function setStatus(message, ok = true) {
 }
 
 function showOutput(data) {
-  if (outputEl) {
-    outputEl.textContent = JSON.stringify(data, null, 2);
-  }
-}
-
-function getToken() {
-  return localStorage.getItem("sysconta_token");
+  if (outputEl) outputEl.textContent = JSON.stringify(data, null, 2);
 }
 
 function setToken(token) {
+  state.token = token;
   localStorage.setItem("sysconta_token", token);
 }
 
 function clearToken() {
+  state.token = null;
   localStorage.removeItem("sysconta_token");
 }
 
@@ -45,33 +45,65 @@ function activateModule(moduleName) {
   moduleSections.forEach((section) => section.classList.add("hidden"));
   moduleButtons.forEach((btn) => btn.classList.remove("active"));
 
-  const target = byId(`module-${moduleName}`);
-  if (target) {
-    target.classList.remove("hidden");
+  if (moduleName === "cadastros") {
+    byId("module-cadastros")?.classList.remove("hidden");
+    byId("module-cadastros-lista")?.classList.remove("hidden");
+  } else {
+    byId(`module-${moduleName}`)?.classList.remove("hidden");
   }
-  const activeBtn = document.querySelector(`.module-btn[data-module="${moduleName}"]`);
-  if (activeBtn) {
-    activeBtn.classList.add("active");
-  }
+
+  const active = document.querySelector(`.module-btn[data-module="${moduleName}"]`);
+  if (active) active.classList.add("active");
 }
 
 function refreshAuthUI() {
-  const hasToken = !!getToken();
-  if (appWorkspace) appWorkspace.classList.toggle("hidden", !hasToken);
-  if (authShell) authShell.classList.toggle("hidden", hasToken);
-  if (hasToken) {
-    activateModule("cadastros");
+  const hasToken = !!state.token;
+  appWorkspace?.classList.toggle("hidden", !hasToken);
+  authShell?.classList.toggle("hidden", hasToken);
+  if (hasToken) activateModule("cadastros");
+}
+
+function fillUserMeta() {
+  byId("metaUser").textContent = `Usuário: ${state.user?.nome || "-"}`;
+  byId("metaEmpresa").textContent = `Empresa ID: ${state.empresaId || "-"}`;
+}
+
+function renderClientes() {
+  const table = byId("clientesTableBody");
+  const select = byId("recClienteId");
+  if (!table || !select) return;
+
+  table.innerHTML = "";
+  select.innerHTML = "";
+
+  if (state.clientes.length === 0) {
+    table.innerHTML = '<tr><td colspan="5">Nenhum cliente cadastrado.</td></tr>';
+    select.innerHTML = '<option value="">Sem clientes</option>';
+    return;
   }
+
+  state.clientes.forEach((cliente) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${cliente.id}</td>
+      <td>${cliente.nome_razao || ""}</td>
+      <td>${cliente.documento || ""}</td>
+      <td>${cliente.email || ""}</td>
+      <td>${cliente.telefone || ""}</td>
+    `;
+    table.appendChild(tr);
+
+    const option = document.createElement("option");
+    option.value = cliente.id;
+    option.textContent = `${cliente.id} - ${cliente.nome_razao}`;
+    select.appendChild(option);
+  });
 }
 
 async function request(path, { method = "GET", body, auth = false, form = false } = {}) {
   const headers = {};
-  if (auth && getToken()) {
-    headers.Authorization = `Bearer ${getToken()}`;
-  }
-  if (!form) {
-    headers["Content-Type"] = "application/json";
-  }
+  if (auth && state.token) headers.Authorization = `Bearer ${state.token}`;
+  if (!form) headers["Content-Type"] = "application/json";
 
   const res = await fetch(path, {
     method,
@@ -86,72 +118,31 @@ async function request(path, { method = "GET", body, auth = false, form = false 
   } catch {
     data = { raw: text };
   }
-  if (!res.ok) {
-    throw new Error(data.detail || data.message || `Erro ${res.status}`);
-  }
+  if (!res.ok) throw new Error(data.detail || data.message || `Erro ${res.status}`);
   return data;
 }
 
-onClick("btnCriarEmpresa", async () => {
-  try {
-    const payload = {
-      nome: byId("empresaNome").value,
-      cnpj: byId("empresaCnpj").value || null,
-    };
-    const data = await request("/empresas", { method: "POST", body: payload });
-    setStatus("Empresa criada com sucesso.");
-    showOutput(data);
-    if (byId("adminEmpresaId")) byId("adminEmpresaId").value = data.id;
-    if (byId("clienteEmpresaId")) byId("clienteEmpresaId").value = data.id;
-    if (byId("recEmpresaId")) byId("recEmpresaId").value = data.id;
-  } catch (err) {
-    setStatus(err.message, false);
-  }
-});
+async function loadMeAndClientes() {
+  state.user = await request("/auth/me", { auth: true });
+  state.empresaId = state.user.empresa_id;
+  fillUserMeta();
 
-onClick("btnToggleSetup", () => {
-  if (!setupCard) return;
-  setupCard.classList.toggle("hidden");
-});
-onClick("btnHideSetup", () => {
-  if (setupCard) setupCard.classList.add("hidden");
-});
-
-onClick("btnBootstrap", async () => {
-  try {
-    const payload = {
-      empresa_id: Number(byId("adminEmpresaId").value),
-      nome: byId("adminNome").value,
-      email: byId("adminEmail").value,
-      password: byId("adminSenha").value,
-      is_superuser: true,
-      permissoes: [],
-    };
-    const data = await request("/auth/bootstrap", { method: "POST", body: payload });
-    setStatus("Administrador inicial criado.");
-    showOutput(data);
-  } catch (err) {
-    setStatus(err.message, false);
-  }
-});
+  const clientes = await request(`/clientes/${state.empresaId}`, { auth: true });
+  state.clientes = Array.isArray(clientes) ? clientes : [];
+  renderClientes();
+}
 
 onClick("btnLogin", async () => {
   try {
-    const email = byId("loginEmail").value;
-    const senha = byId("loginSenha").value;
     const form = new URLSearchParams();
-    form.append("username", email);
-    form.append("password", senha);
-
-    const data = await request("/auth/login", {
-      method: "POST",
-      form: true,
-      body: form,
-    });
+    form.append("username", byId("loginEmail").value);
+    form.append("password", byId("loginSenha").value);
+    const data = await request("/auth/login", { method: "POST", body: form, form: true });
     setToken(data.access_token);
+    await loadMeAndClientes();
+    refreshAuthUI();
     setStatus("Login realizado com sucesso.");
     showOutput(data);
-    refreshAuthUI();
   } catch (err) {
     setStatus(err.message, false);
   }
@@ -162,41 +153,31 @@ onClick("btnFillDefault", () => {
   byId("loginSenha").value = "Admin@123456";
 });
 
-moduleButtons.forEach((btn) => {
-  btn.addEventListener("click", () => {
-    const moduleName = btn.getAttribute("data-module");
-    if (moduleName) {
-      activateModule(moduleName);
-    }
-  });
-});
-
-onClick("btnMe", async () => {
-  try {
-    const data = await request("/auth/me", { auth: true });
-    setStatus("Dados do usuário carregados.");
-    showOutput(data);
-  } catch (err) {
-    setStatus(err.message, false);
-  }
-});
-
 onClick("btnLogout", () => {
   clearToken();
+  state.user = null;
+  state.empresaId = null;
+  state.clientes = [];
   refreshAuthUI();
   setStatus("Sessão encerrada.");
 });
 
 onClick("btnCriarCliente", async () => {
   try {
+    if (!state.empresaId) throw new Error("Faça login novamente.");
     const payload = {
-      empresa_id: Number(byId("clienteEmpresaId").value),
+      empresa_id: state.empresaId,
       tipo_documento: byId("clienteTipo").value,
       documento: byId("clienteDocumento").value,
       nome_razao: byId("clienteNome").value,
       email: byId("clienteEmail").value || null,
       telefone: byId("clienteTelefone").value || null,
       cep: byId("clienteCep").value || null,
+      endereco: byId("clienteEndereco").value || null,
+      numero: byId("clienteNumero").value || null,
+      bairro: byId("clienteBairro").value || null,
+      cidade: byId("clienteCidade").value || null,
+      estado: byId("clienteEstado").value || null,
       senha_portal: byId("clienteSenhaPortal").value || null,
     };
     const data = await request("/clientes?auto_fill_endereco=true&auto_fill_cnpj=true", {
@@ -206,6 +187,7 @@ onClick("btnCriarCliente", async () => {
     });
     setStatus("Cliente cadastrado com sucesso.");
     showOutput(data);
+    await loadMeAndClientes();
   } catch (err) {
     setStatus(err.message, false);
   }
@@ -213,10 +195,8 @@ onClick("btnCriarCliente", async () => {
 
 onClick("btnListarClientes", async () => {
   try {
-    const empresaId = Number(byId("clienteEmpresaId").value);
-    const data = await request(`/clientes/${empresaId}`, { auth: true });
-    setStatus("Clientes listados com sucesso.");
-    showOutput(data);
+    await loadMeAndClientes();
+    setStatus("Lista de clientes atualizada.");
   } catch (err) {
     setStatus(err.message, false);
   }
@@ -224,8 +204,9 @@ onClick("btnListarClientes", async () => {
 
 onClick("btnCriarReceber", async () => {
   try {
+    if (!state.empresaId) throw new Error("Faça login novamente.");
     const payload = {
-      empresa_id: Number(byId("recEmpresaId").value),
+      empresa_id: state.empresaId,
       cliente_id: Number(byId("recClienteId").value),
       descricao: byId("recDescricao").value,
       valor: Number(byId("recValor").value),
@@ -243,8 +224,18 @@ onClick("btnCriarReceber", async () => {
   }
 });
 
+moduleButtons.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const moduleName = btn.getAttribute("data-module");
+    if (moduleName) activateModule(moduleName);
+  });
+});
+
 refreshAuthUI();
 
+if (byId("recVencimento")) {
+  byId("recVencimento").value = new Date().toISOString().slice(0, 10);
+}
 if (byId("loginEmail") && !byId("loginEmail").value) {
   byId("loginEmail").value = "admin@sysconta.com";
 }
