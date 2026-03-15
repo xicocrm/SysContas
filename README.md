@@ -140,6 +140,12 @@ Execute no PowerShell como Administrador:
 powershell -ExecutionPolicy Bypass -File .\installers\windows\install_sysconta.ps1
 ```
 
+Instalacao online em 1 comando (PowerShell como Administrador):
+
+```powershell
+powershell -ExecutionPolicy Bypass -Command "iwr -useb https://raw.githubusercontent.com/xicocrm/SysContas/cursor/sistema-sysconta-completo-52c3/installers/windows/install_sysconta_online.ps1 | iex"
+```
+
 Parametros opcionais:
 
 - `-DeployDir "C:\SysConta"`
@@ -152,6 +158,7 @@ O instalador Windows faz automaticamente:
 
 - instalacao do Python (winget/chocolatey)
 - instalacao do NSSM para servico Windows
+- obtencao automatica do codigo (repo local, ZIP do GitHub ou clone Git)
 - copia/sincronizacao de codigo para pasta de deploy
 - virtualenv + requirements
 - criacao de `.env` com `SECRET_KEY`
@@ -159,6 +166,7 @@ O instalador Windows faz automaticamente:
 - criacao e inicializacao de servico `SysContaAPI`
 - regra de firewall para porta da API
 - healthcheck com autocorrecao (restart de servico + reinstall deps)
+- validacao real de login inicial antes de finalizar
 
 ### Observacao de autenticacao
 
