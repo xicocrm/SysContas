@@ -7,3 +7,5 @@ python-multipart
 email-validator
 httpx
 pydantic-settings
+psycopg[binary]
+pymysql

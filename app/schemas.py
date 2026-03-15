@@ -3,7 +3,13 @@ from typing import Generic, Optional, TypeVar
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
-from app.models import BancoIntegracao, CanalIntegracao, ModuloPermissao, TipoDocumento
+from app.models import (
+    BancoIntegracao,
+    CanalIntegracao,
+    ModuloPermissao,
+    TipoBancoDados,
+    TipoDocumento,
+)
 
 T = TypeVar("T")
 
@@ -93,6 +99,40 @@ class UserRead(BaseModel):
 class UserPermissionsUpdate(BaseModel):
     permissoes: list[ModuloPermissao]
     is_active: Optional[bool] = None
+
+
+class DatabaseIntegrationCreate(BaseModel):
+    empresa_id: int
+    nome: str
+    tipo: TipoBancoDados
+    database_url: Optional[str] = None
+    host: Optional[str] = None
+    porta: Optional[int] = None
+    database_name: Optional[str] = None
+    username: Optional[str] = None
+    password: Optional[str] = None
+    sqlite_path: Optional[str] = None
+    principal: bool = False
+
+
+class DatabaseIntegrationRead(BaseModel):
+    id: int
+    empresa_id: int
+    nome: str
+    tipo: TipoBancoDados
+    database_url_mascarada: str
+    ativo: bool
+    principal: bool
+    created_at: datetime
+
+
+class DatabaseConnectionTestResult(BaseModel):
+    ok: bool
+    message: str
+
+
+class DatabaseIntegrationApplyInput(BaseModel):
+    persistir_em_arquivo: bool = False
 
 
 class ClienteCreate(BaseModel):

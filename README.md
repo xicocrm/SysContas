@@ -13,6 +13,7 @@ Backend base para um sistema **SysConta** com foco em:
 - Portal do cliente (acesso por CPF/CNPJ + senha, com bloqueio)
 - Notificações por e-mail e WhatsApp (via integrações cadastradas)
 - Estrutura de integrações com canais e bancos
+- Integração com bancos de dados para armazenamento da aplicação
 
 ## Módulos disponíveis
 
@@ -25,7 +26,7 @@ Backend base para um sistema **SysConta** com foco em:
 - `Campanhas`: campanhas de comunicação
 - `Integrações`: canais e bancos
 - `Portal`: login do cliente e consulta de contas a receber
-- `Configurações`: permissões de usuários
+- `Configurações`: permissões de usuários + integração de banco de dados
 - `Notificações`: envio integrado (MVP)
 
 ## Integrações suportadas (cadastro)
@@ -85,6 +86,32 @@ SECRET_KEY=troque-esta-chave-em-producao
 TOKEN_EXPIRE_MINUTES=1440
 DATABASE_URL=sqlite:///./sysconta.db
 ```
+
+## Integração com bancos de dados (Configurações)
+
+Agora o módulo de configurações possui endpoints para:
+
+- Cadastrar conexões de banco de dados por empresa
+- Testar conexão (`SELECT 1`)
+- Definir conexão principal
+- Aplicar conexão como armazenamento ativo da aplicação
+- Persistir `DATABASE_URL` automaticamente no `.env` (opcional)
+
+Tipos suportados:
+
+- sqlite
+- postgresql (driver `psycopg`)
+- mysql / mariadb (driver `pymysql`)
+- sqlserver (requer driver ODBC no servidor)
+
+Endpoints principais:
+
+- `GET /configuracoes/bancos-dados/tipos`
+- `POST /configuracoes/bancos-dados`
+- `GET /configuracoes/{empresa_id}/bancos-dados`
+- `POST /configuracoes/bancos-dados/{integracao_id}/testar`
+- `POST /configuracoes/bancos-dados/{integracao_id}/aplicar-armazenamento`
+- `GET /configuracoes/armazenamento-ativo`
 
 ## Fluxo inicial recomendado
 

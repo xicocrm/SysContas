@@ -47,6 +47,14 @@ class BancoIntegracao(str, Enum):
     CAIXA = "caixa"
 
 
+class TipoBancoDados(str, Enum):
+    SQLITE = "sqlite"
+    POSTGRESQL = "postgresql"
+    MYSQL = "mysql"
+    MARIADB = "mariadb"
+    SQLSERVER = "sqlserver"
+
+
 class Empresa(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     nome: str = Field(index=True)
@@ -199,4 +207,15 @@ class IntegracaoBanco(SQLModel, table=True):
     banco: BancoIntegracao = Field(index=True)
     credenciais_json: str
     ativo: bool = True
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class IntegracaoBancoDados(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    empresa_id: int = Field(foreign_key="empresa.id", index=True)
+    nome: str = Field(index=True)
+    tipo: TipoBancoDados = Field(index=True)
+    database_url: str
+    ativo: bool = True
+    principal: bool = False
     created_at: datetime = Field(default_factory=datetime.utcnow)
