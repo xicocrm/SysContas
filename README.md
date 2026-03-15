@@ -75,6 +75,70 @@ uvicorn app.main:app --reload
 
 Swagger: `http://127.0.0.1:8000/docs`
 
+## Instalador completo automatico (VPS e Windows)
+
+O projeto agora inclui instaladores com:
+
+- instalacao automatica de dependencias
+- retries com backoff exponencial
+- autocorrecao em falhas comuns
+- healthcheck final obrigatorio
+- continuidade automatica da instalacao ate concluir com sucesso
+
+### VPS Linux (Ubuntu/Debian)
+
+Arquivo: `installers/vps/install_sysconta.sh`
+
+```bash
+sudo bash installers/vps/install_sysconta.sh
+```
+
+Variaveis opcionais:
+
+- `APP_PORT` (padrao: `8000`)
+- `DOMAIN` (padrao: `_`)
+- `DEPLOY_ROOT` (padrao: `/opt/sysconta`)
+- `SYSCONTA_REPO_URL` (usa clone automatico se a pasta atual nao tiver o codigo)
+- `MAX_RETRIES` (padrao: `8`)
+
+O instalador Linux faz automaticamente:
+
+- apt repair (`dpkg --configure -a`, `apt-get install -f`)
+- instalacao de Python, Nginx, Git, OpenSSL e utilitarios
+- virtualenv + instalacao de requirements
+- criacao de `.env` com `SECRET_KEY`
+- configuracao de `systemd` para API
+- configuracao de Nginx reverse proxy
+- healthcheck da API
+- fallback automatico para Docker se o modo nativo falhar
+
+### Windows Server
+
+Arquivo: `installers/windows/install_sysconta.ps1`
+
+Execute no PowerShell como Administrador:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\installers\windows\install_sysconta.ps1
+```
+
+Parametros opcionais:
+
+- `-DeployDir "C:\SysConta"`
+- `-Port 8000`
+- `-MaxRetries 8`
+
+O instalador Windows faz automaticamente:
+
+- instalacao do Python (winget/chocolatey)
+- instalacao do NSSM para servico Windows
+- copia/sincronizacao de codigo para pasta de deploy
+- virtualenv + requirements
+- criacao de `.env` com `SECRET_KEY`
+- criacao e inicializacao de servico `SysContaAPI`
+- regra de firewall para porta da API
+- healthcheck com autocorrecao (restart de servico + reinstall deps)
+
 ## Configuração por variáveis de ambiente
 
 Crie um arquivo `.env`:
