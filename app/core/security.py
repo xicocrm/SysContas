@@ -6,13 +6,17 @@ from passlib.context import CryptContext
 
 from app.core.config import settings
 
-# Use PBKDF2 to avoid runtime incompatibilities with bcrypt backend versions.
-pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
+# PBKDF2 is default for new hashes; bcrypt stays for legacy verification.
+pwd_context = CryptContext(schemes=["pbkdf2_sha256", "bcrypt"], deprecated="auto")
 ALGORITHM = "HS256"
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+    try:
+        return pwd_context.verify(plain_password, hashed_password)
+    except Exception:
+        # Avoid 500 on legacy/invalid hash formats; treat as invalid credentials.
+        return False
 
 
 def get_password_hash(password: str) -> str:
