@@ -174,8 +174,102 @@ setup_python_env() {
 }
 
 seed_admin_user() {
-  retry "${MAX_RETRIES}" 2 "criar/ajustar admin inicial" \
-    bash -c "cd '${CURRENT_DIR}' && ${VENV_DIR}/bin/python -m app.scripts.ensure_admin"
+  local py_bin="${VENV_DIR}/bin/python"
+
+  seed_admin_user_module() {
+    cd "${CURRENT_DIR}"
+    "${py_bin}" -m app.scripts.ensure_admin
+  }
+
+  seed_admin_user_inline() {
+    cd "${CURRENT_DIR}"
+    SEED_ADMIN_NAME="${SEED_ADMIN_NAME}" \
+    SEED_ADMIN_EMAIL="${SEED_ADMIN_EMAIL}" \
+    SEED_ADMIN_PASSWORD="${SEED_ADMIN_PASSWORD}" \
+    SEED_COMPANY_NAME="${SEED_COMPANY_NAME}" \
+    SEED_COMPANY_CNPJ="${SEED_COMPANY_CNPJ}" \
+    "${py_bin}" - <<'PY'
+import os
+import sys
+from pathlib import Path
+
+from passlib.context import CryptContext
+from sqlmodel import SQLModel, Session, create_engine, select
+
+sys.path.insert(0, os.getcwd())
+from app.models import Empresa, User  # noqa: E402
+
+
+def read_database_url() -> str:
+    env_file = Path(".env")
+    if not env_file.exists():
+        return "sqlite:///./sysconta.db"
+    for line in env_file.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if line.startswith("DATABASE_URL="):
+            return line.split("=", maxsplit=1)[1].strip() or "sqlite:///./sysconta.db"
+    return "sqlite:///./sysconta.db"
+
+
+database_url = read_database_url()
+connect_args = {"check_same_thread": False} if database_url.startswith("sqlite") else {}
+engine = create_engine(database_url, connect_args=connect_args)
+SQLModel.metadata.create_all(engine)
+
+seed_admin_name = os.getenv("SEED_ADMIN_NAME", "Administrador")
+seed_admin_email = os.getenv("SEED_ADMIN_EMAIL", "admin@sysconta.com").strip().lower()
+seed_admin_password = os.getenv("SEED_ADMIN_PASSWORD", "Admin@123456")
+seed_company_name = os.getenv("SEED_COMPANY_NAME", "Empresa Principal")
+seed_company_cnpj = os.getenv("SEED_COMPANY_CNPJ", "00000000000191")
+
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
+
+with Session(engine) as session:
+    company = None
+    if seed_company_cnpj:
+        company = session.exec(select(Empresa).where(Empresa.cnpj == seed_company_cnpj)).first()
+    if not company:
+        company = session.exec(select(Empresa).where(Empresa.nome == seed_company_name)).first()
+    if not company:
+        company = Empresa(nome=seed_company_name, cnpj=seed_company_cnpj or None, ativa=True)
+        session.add(company)
+        session.commit()
+        session.refresh(company)
+
+    user = session.exec(select(User).where(User.email == seed_admin_email)).first()
+    if user:
+        user.empresa_id = company.id
+        user.nome = seed_admin_name
+        user.is_active = True
+        user.is_superuser = True
+        user.hashed_password = pwd_context.hash(seed_admin_password)
+        session.add(user)
+        session.commit()
+        print(f"Admin atualizado: {seed_admin_email}")
+    else:
+        user = User(
+            empresa_id=company.id,
+            nome=seed_admin_name,
+            email=seed_admin_email,
+            hashed_password=pwd_context.hash(seed_admin_password),
+            is_active=True,
+            is_superuser=True,
+            permissoes_csv="",
+        )
+        session.add(user)
+        session.commit()
+        print(f"Admin criado: {seed_admin_email}")
+PY
+  }
+
+  if retry "${MAX_RETRIES}" 2 "criar/ajustar admin inicial (modulo)" seed_admin_user_module; then
+    return 0
+  fi
+
+  log "Modulo de seed nao encontrado. Aplicando fallback inline..."
+  retry "${MAX_RETRIES}" 2 "criar/ajustar admin inicial (fallback)" seed_admin_user_inline
 }
 
 write_systemd_service() {
