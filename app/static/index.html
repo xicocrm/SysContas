@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SysConta - Sistema</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">SysConta</header>
+
+    <section class="login-page" id="authShell">
+      <div class="login-card" id="loginCard">
+        <h1>Entrar no sistema</h1>
+        <p>Login rápido para acessar os módulos.</p>
+        <div id="status"></div>
+        <div class="form-grid">
+          <div>
+            <label>E-mail</label>
+            <input id="loginEmail" placeholder="admin@sysconta.com" />
+          </div>
+          <div>
+            <label>Senha</label>
+            <input id="loginSenha" type="password" placeholder="Sua senha" />
+          </div>
+        </div>
+        <div class="row-actions">
+          <button id="btnLogin">Entrar</button>
+          <button class="secondary" id="btnFillDefault" type="button">Acesso padrão</button>
+        </div>
+        <small class="login-help">
+          Acesso inicial: <b>admin@sysconta.com</b> / <b>Admin@123456</b>
+        </small>
+      </div>
+    </section>
+
+    <div class="container hidden" id="appWorkspace">
+      <div class="card" id="appCard">
+        <h2>Painel</h2>
+        <p class="inline-meta">
+          <span id="metaUser">Usuário: -</span> | <span id="metaEmpresa">Empresa: -</span>
+        </p>
+        <div class="row-actions">
+          <button id="btnLogout" class="secondary">Sair</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Módulos</h2>
+        <div class="module-grid">
+          <button class="module-btn" data-module="cadastros">Cadastros</button>
+          <button class="module-btn" data-module="financeiro">Financeiro</button>
+          <button class="module-btn" data-module="comercial">Comercial</button>
+          <button class="module-btn" data-module="juridico">Jurídico</button>
+          <button class="module-btn" data-module="campanhas">Campanhas</button>
+          <button class="module-btn" data-module="integracoes">Integrações</button>
+          <button class="module-btn" data-module="configuracoes">Configurações</button>
+          <button class="module-btn" data-module="portal">Portal do cliente</button>
+          <button class="module-btn" data-module="notificacoes">Notificações</button>
+        </div>
+      </div>
+
+      <div class="card module-section" id="module-cadastros">
+        <h2>Cadastro rápido de cliente</h2>
+        <div class="grid">
+          <div>
+            <label>Tipo</label>
+            <select id="clienteTipo">
+              <option value="cpf">CPF</option>
+              <option value="cnpj">CNPJ</option>
+            </select>
+          </div>
+          <div>
+            <label>CPF/CNPJ</label>
+            <input id="clienteDocumento" placeholder="Somente números" />
+          </div>
+          <div>
+            <label>Nome / Razão social</label>
+            <input id="clienteNome" placeholder="Nome do cliente" />
+          </div>
+          <div>
+            <label>Telefone</label>
+            <input id="clienteTelefone" placeholder="(00) 00000-0000" />
+          </div>
+          <div>
+            <label>E-mail</label>
+            <input id="clienteEmail" placeholder="cliente@email.com" />
+          </div>
+          <div>
+            <label>Senha do portal (opcional)</label>
+            <input id="clienteSenhaPortal" type="password" placeholder="Mínimo 8 caracteres" />
+          </div>
+        </div>
+        <details class="optional-block">
+          <summary>Campos opcionais (endereço)</summary>
+          <div class="grid">
+            <div>
+              <label>CEP</label>
+              <input id="clienteCep" placeholder="00000000" />
+            </div>
+            <div>
+              <label>Endereço</label>
+              <input id="clienteEndereco" />
+            </div>
+            <div>
+              <label>Número</label>
+              <input id="clienteNumero" />
+            </div>
+            <div>
+              <label>Bairro</label>
+              <input id="clienteBairro" />
+            </div>
+            <div>
+              <label>Cidade</label>
+              <input id="clienteCidade" />
+            </div>
+            <div>
+              <label>Estado</label>
+              <input id="clienteEstado" />
+            </div>
+          </div>
+        </details>
+        <div class="row-actions">
+          <button id="btnCriarCliente">Salvar cliente</button>
+          <button class="secondary" id="btnListarClientes">Atualizar lista</button>
+        </div>
+      </div>
+
+      <div class="card module-section" id="module-cadastros-lista">
+        <h2>Clientes cadastrados</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Documento</th>
+                <th>E-mail</th>
+                <th>Telefone</th>
+              </tr>
+            </thead>
+            <tbody id="clientesTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card module-section hidden" id="module-financeiro">
+        <h2>Conta a receber</h2>
+        <div class="grid">
+          <div>
+            <label>Cliente</label>
+            <select id="recClienteId"></select>
+          </div>
+          <div>
+            <label>Descrição</label>
+            <input id="recDescricao" placeholder="Mensalidade" />
+          </div>
+          <div>
+            <label>Valor</label>
+            <input id="recValor" placeholder="199.90" />
+          </div>
+          <div>
+            <label>Vencimento</label>
+            <input id="recVencimento" type="date" />
+          </div>
+        </div>
+        <div class="row-actions">
+          <button id="btnCriarReceber">Salvar conta a receber</button>
+        </div>
+      </div>
+
+      <div class="card module-section hidden" id="module-comercial">
+        <h2>Comercial</h2>
+        <p>Negociações, propostas e contratos disponíveis neste módulo.</p>
+      </div>
+      <div class="card module-section hidden" id="module-juridico">
+        <h2>Jurídico</h2>
+        <p>Processos e protocolos disponíveis neste módulo.</p>
+      </div>
+      <div class="card module-section hidden" id="module-campanhas">
+        <h2>Campanhas</h2>
+        <p>Gestão de campanhas de comunicação.</p>
+      </div>
+      <div class="card module-section hidden" id="module-integracoes">
+        <h2>Integrações</h2>
+        <p>Configuração de APIs e bancos.</p>
+      </div>
+      <div class="card module-section hidden" id="module-configuracoes">
+        <h2>Configurações</h2>
+        <p>Permissões, usuários e bancos de dados da aplicação.</p>
+      </div>
+      <div class="card module-section hidden" id="module-portal">
+        <h2>Portal do cliente</h2>
+        <p>Acesso para cliente por CPF/CNPJ.</p>
+      </div>
+      <div class="card module-section hidden" id="module-notificacoes">
+        <h2>Notificações</h2>
+        <p>Envio de notificações por e-mail e WhatsApp.</p>
+      </div>
+
+      <div class="card">
+        <h2>Resultado</h2>
+        <pre id="output">{}</pre>
+      </div>
+    </div>
+    <script src="/static/app.js"></script>
+  </body>
+</html>
